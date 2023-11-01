@@ -1,33 +1,18 @@
 import { parseDate, stringToDocument, yesterday } from "./utils.ts";
 import { Element } from "dom";
 
-async function save(
-  url: URL,
-  date: string,
-  index = 1,
-): Promise<URL | undefined> {
-  const response = await fetch(url);
-  const html = await response.text();
+async function saveDay(date: Date) {
+  const [year, month, day] = parseDate(date);
 
-  // Save file
-  Deno.mkdirSync(`files/${date}`, { recursive: true });
-  const path = `files/${date}/${index}.html`;
-  Deno.writeTextFileSync(path, html);
+  const url = new URL(
+    `https://www.xunta.gal/diario-oficial-galicia/mostrarContenido.do?ruta=/${year}/${year}${month}${day}/Secciones1_gl.html&paginaCompleta=false&fecha=${day}/${month}/${year}&compMenu=10102`,
+  );
 
-  const document = stringToDocument(html);
-  const next = document.querySelector(".enlaceSiguiente a") as Element;
-  const href = next?.getAttribute("href");
-
-  if (href) {
-    return new URL(href, url);
-  }
-}
-
-async function saveNumber(url: URL, date: string) {
   // Check if exists
+  const path = `files/${year}/${year}-${month}-${day}`;
   try {
-    if (Deno.statSync(`files/${date}`)) {
-      console.log(`Skip ${date}`);
+    if (Deno.statSync(path)) {
+      console.log(`Skip ${path}`);
       return;
     }
   } catch {
@@ -40,7 +25,7 @@ async function saveNumber(url: URL, date: string) {
   // Check if exists (the response is always 200)
   const title = document.querySelector(".cabeceiraContido h1");
   if (title?.innerText.trim() === "Páxina non atopada") {
-    console.log("Not found");
+    console.log("No DOG for", date);
     return;
   }
 
@@ -48,22 +33,36 @@ async function saveNumber(url: URL, date: string) {
     ".corpoContido .dog-toc-sumario a",
   ) as Element;
 
-  await saveAll(new URL(firstLink.getAttribute("href")!, url), date);
+  await saveAll(new URL(firstLink.getAttribute("href")!, url), path);
 }
 
-async function saveAll(next: URL | undefined, date: string, page = 1) {
+async function saveAll(next: URL | undefined, path: string, page = 1) {
+  Deno.mkdirSync(path, { recursive: true });
+
   while (next) {
     console.log({ url: next.href, page });
-    next = await save(next, date, page++);
+    next = await save(next, path, page++);
   }
 }
 
-function getUrlForDate(date = new Date()): [URL, string] {
-  const [year, month, day] = parseDate(date);
+async function save(
+  url: URL,
+  path: string,
+  index = 1,
+): Promise<URL | undefined> {
+  const response = await fetch(url);
+  const html = await response.text();
 
-  const url =
-    `https://www.xunta.gal/diario-oficial-galicia/mostrarContenido.do?ruta=/${year}/${year}${month}${day}/Secciones1_gl.html&paginaCompleta=false&fecha=${day}/${month}/${year}&compMenu=10102`;
-  return [new URL(url), `${year}-${month}-${day}`];
+  // Save file
+  Deno.writeTextFileSync(`${path}/${index}.html`, html);
+
+  const document = stringToDocument(html);
+  const next = document.querySelector(".enlaceSiguiente a") as Element;
+  const href = next?.getAttribute("href");
+
+  if (href) {
+    return new URL(href, url);
+  }
 }
 
-await saveNumber(...getUrlForDate(yesterday()));
+await saveDay(yesterday());

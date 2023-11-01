@@ -4,20 +4,19 @@ import { stringify } from "std/yaml/mod.ts";
 import { format } from "std/fmt/bytes.ts";
 import { extract, test } from "std/front_matter/yaml.ts";
 
-function process(date: string) {
-  const directory = `files/${date}`;
-  const files = Deno.readDirSync(directory);
+function process(path: string) {
+  const files = Deno.readDirSync(path);
 
   for (const file of files) {
     if (file.name.endsWith(".html")) {
-      processFile(`${directory}/${file.name}`, date);
+      processFile(`${path}/${file.name}`);
     }
   }
 }
 
 let number = 1;
 
-function processFile(path: string, date: string) {
+function processFile(path: string) {
   let content = Deno.readTextFileSync(path);
 
   console.log(
@@ -25,10 +24,12 @@ function processFile(path: string, date: string) {
     `Processing ${path.padEnd(26)}`,
     format(content.length).padStart(10),
   );
+
   const { attrs, body } = test(content)
     ? extract<Announcement>(content)
     : { attrs: {}, body: content };
 
+  const date = path.split("/")[2];
   const document = stringToDocument(body);
   const announcement = { date, ...attrs, ...scrape(document) };
 
@@ -205,12 +206,17 @@ function cleanHTML(element: Element): string {
   return code;
 }
 
-// process(parseDate(yesterday()).join("-"));
-// process("1997-05-02");
+const day = parseDate(yesterday());
+process(`files/${day[0]}/${day.join("-")}`);
 
-const files = Deno.readDirSync("files");
-for (const file of files) {
-  if (file.isDirectory) {
-    process(file.name);
-  }
-}
+// process("files/2023/2023-10-31");
+
+// for (const year of Deno.readDirSync("files")) {
+//   if (year.isDirectory) {
+//     for (const day of Deno.readDirSync(`files/${year.name}`)) {
+//       if (day.isDirectory) {
+//         process(`files/${year.name}/${day.name}`);
+//       }
+//     }
+//   }
+// }
