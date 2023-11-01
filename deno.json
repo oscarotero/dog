@@ -1,0 +1,15 @@
+{
+  "imports": {
+    "dom": "https://deno.land/x/deno_dom@v0.1.42/deno-dom-wasm.ts",
+    "std/": "https://deno.land/std@0.204.0/"
+  },
+  "fmt": {
+    "exclude": [
+      "files"
+    ]
+  },
+  "tasks": {
+    "download": "deno run --v8-flags=--max-old-space-size=8000 -A scripts/download.ts",
+    "clean": "deno run --v8-flags=--max-old-space-size=8000 -A scripts/clean.ts"
+  }
+}
