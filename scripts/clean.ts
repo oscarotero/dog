@@ -156,11 +156,16 @@ function cleanHTML(element: Element): string {
   element.querySelectorAll("td > p").forEach((p) => {
     (p as Element).replaceWith((p as Element).innerHTML);
   });
-  element.querySelectorAll("td").forEach((td) =>
+  element.querySelectorAll("td,th").forEach((td) =>
     (td as Element).innerHTML = (td as Element).innerHTML?.trim()
   );
   element.querySelectorAll("table[border]").forEach((table) => {
     (table as Element).removeAttribute("border");
+  });
+  element.querySelectorAll("td.dog-celda-encabezado").forEach((td) => {
+    const th = document.createElement("th");
+    th.innerHTML = (td as Element).innerHTML;
+    (td as Element).replaceWith(th);
   });
 
   // Remove tables ids
@@ -206,10 +211,10 @@ function cleanHTML(element: Element): string {
   return code;
 }
 
-const day = parseDate(yesterday());
-process(`files/${day[0]}/${day.join("-")}`);
+// const day = parseDate(yesterday());
+// process(`files/${day[0]}/${day.join("-")}`);
 
-// process("files/2023/2023-10-31");
+process("files/2011/2011-05-02");
 
 // for (const year of Deno.readDirSync("files")) {
 //   if (year.isDirectory) {
