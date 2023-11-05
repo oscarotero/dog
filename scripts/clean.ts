@@ -1,5 +1,4 @@
-import { parseDate, stringToDocument, yesterday } from "./utils.ts";
-import { Element, HTMLDocument } from "dom";
+import { parseDate, stringToDocument, stringToFragment, yesterday } from "./utils.ts";
 import { stringify } from "std/yaml/mod.ts";
 import { format } from "std/fmt/bytes.ts";
 import { extract, test } from "std/front_matter/yaml.ts";
@@ -21,7 +20,7 @@ function processFile(path: string) {
 
   console.log(
     number++,
-    `Processing ${path.padEnd(26)}`,
+    `Processing ${path.padEnd(30)}`,
     format(content.length).padStart(10),
   );
 
@@ -62,7 +61,7 @@ interface Announcement {
   [key: string]: unknown;
 }
 
-function scrape(document: HTMLDocument): Announcement {
+function scrape(document: Document): Announcement {
   const announcement: Announcement = {};
   const id = document.querySelector(".idiomaSeleccionado")?.getAttribute("href")
     ?.match(/\/Anuncio([^_]+)_gl\.html$/);
@@ -119,13 +118,28 @@ function cleanHTML(element: Element): string {
   // Fix <span>
   element.querySelectorAll("span.dog-cursiva").forEach((span) => {
     const em = document.createElement("em");
-    em.innerHTML = (span as Element).innerHTML;
-    (span as Element).replaceWith(em);
+    em.innerHTML = span.innerHTML;
+    span.replaceWith(em);
+  });
+  element.querySelectorAll("span.dog-negrita").forEach((span) => {
+    const strong = document.createElement("strong");
+    strong.innerHTML = span.innerHTML;
+    span.replaceWith(strong);
+  });
+  element.querySelectorAll("span.dog-superindice").forEach((span) => {
+    const sup = document.createElement("sup");
+    sup.innerHTML = span.innerHTML;
+    span.replaceWith(sup);
+  });
+  element.querySelectorAll("span.dog-subindice").forEach((span) => {
+    const sub = document.createElement("sub");
+    sub.innerHTML = span.innerHTML;
+    span.replaceWith(sub);
   });
 
-  element.querySelectorAll("span.dog-normal, span.fuente-de-p-rrafo-predeter-")
+  element.querySelectorAll("span.dog-normal, span.fuente-de-p-rrafo-predeter-, .span.dog-texto-sumario")
     .forEach((span) => {
-      (span as Element).replaceWith(span.innerHTML);
+      span.replaceWith(stringToFragment(span.innerHTML));
     });
 
   // Fix headers
@@ -134,55 +148,55 @@ function cleanHTML(element: Element): string {
   ).forEach(
     (p) => {
       const h2 = document.createElement("h2");
-      h2.innerHTML = (p as Element).innerHTML;
-      (p as Element).replaceWith(h2);
+      h2.innerHTML = p.innerHTML;
+      p.replaceWith(h2);
     },
   );
   element.querySelectorAll("p.dog-capitulo-nome, p.dog-centrado-negrita")
     .forEach((p) => {
       const h3 = document.createElement("h3");
-      h3.innerHTML = (p as Element).innerHTML;
-      (p as Element).replaceWith(h3);
+      h3.innerHTML = p.innerHTML;
+      p.replaceWith(h3);
     });
 
   // Fix footers
   element.querySelectorAll("p.dog-firma-centrada").forEach((p) => {
     const footer = document.createElement("footer");
-    footer.innerHTML = `<p>${(p as Element).innerHTML}</p>`;
-    (p as Element).replaceWith(footer);
+    footer.innerHTML = `<p>${p.innerHTML}</p>`;
+    p.replaceWith(footer);
   });
 
   // Fix table cells
   element.querySelectorAll("td > p").forEach((p) => {
-    (p as Element).replaceWith((p as Element).innerHTML);
+    p.parentElement!.innerHTML = p.innerHTML;
   });
   element.querySelectorAll("td,th").forEach((td) =>
-    (td as Element).innerHTML = (td as Element).innerHTML?.trim()
+    td.innerHTML = td.innerHTML?.trim()
   );
   element.querySelectorAll("table[border]").forEach((table) => {
-    (table as Element).removeAttribute("border");
+    table.removeAttribute("border");
   });
   element.querySelectorAll("td.dog-celda-encabezado").forEach((td) => {
     const th = document.createElement("th");
-    th.innerHTML = (td as Element).innerHTML;
-    (td as Element).replaceWith(th);
+    th.innerHTML = td.innerHTML;
+    td.replaceWith(th);
   });
 
   // Remove tables ids
   element.querySelectorAll("table[id]").forEach((table) => {
-    (table as Element).removeAttribute("id");
+    table.removeAttribute("id");
   });
 
   // Remove classes
   element.querySelectorAll(
     "p.dog-base-sangria, p.dog-base-sin-sangria-sin-espaciado, p.dog-base-sin-sangria-primera-linea-anexo, p.dog-base-sin-sangria, p.dog-parrafo-justificado",
   ).forEach((p) => {
-    (p as Element).removeAttribute("class");
+    p.removeAttribute("class");
   });
 
   // Remove span elements
   element.querySelectorAll("span.dog-hyperlink").forEach((span) => {
-    (span as Element).replaceWith((span as Element).querySelector("a")!);
+    span.replaceWith(span.querySelector("a")!);
   });
 
   let code = element.innerHTML!;
@@ -199,6 +213,21 @@ function cleanHTML(element: Element): string {
   // Remove empty elements tags
   code = code.replace(/<(p|table)[^>]*>\n?<\/(p|table)>/g, "");
 
+  // Fix https links
+  code = code.replace(
+    /&lt;(https?:\/\/[^\s]+)&gt;/g,
+    (_, url) => {
+      return `<a href="${url}">${url}</a>`;
+    }
+  );
+  // Fix email address
+  code = code.replace(
+    /&lt;([^\s]+)@([^\s]+)&gt;/g,
+    (_, name, domain) => {
+      return `<a href="mailto:${name}@${domain}">${name}@${domain}</a>`;
+    }
+  );
+
   // Remove empty lines
   code = code.replace(/^\s*[\r\n]/gm, "");
 
@@ -214,14 +243,14 @@ function cleanHTML(element: Element): string {
 // const day = parseDate(yesterday());
 // process(`files/${day[0]}/${day.join("-")}`);
 
-process("files/2011/2011-05-02");
+// process("files/2017/2017-04-17");
 
-// for (const year of Deno.readDirSync("files")) {
-//   if (year.isDirectory) {
-//     for (const day of Deno.readDirSync(`files/${year.name}`)) {
-//       if (day.isDirectory) {
-//         process(`files/${year.name}/${day.name}`);
-//       }
-//     }
-//   }
-// }
+for (const year of Deno.readDirSync("files")) {
+  if (year.isDirectory) {
+    for (const day of Deno.readDirSync(`files/${year.name}`)) {
+      if (day.isDirectory) {
+        process(`files/${year.name}/${day.name}`);
+      }
+    }
+  }
+}

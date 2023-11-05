@@ -1,15 +1,26 @@
-import { DOMParser, HTMLDocument } from "dom";
+/// <reference lib="dom" />
+import { DOMParser } from "dom";
+
 
 const parser = new DOMParser();
 
-export function stringToDocument(string: string): HTMLDocument {
+export function stringToDocument(string: string): Document {
   const document = parser.parseFromString(string, "text/html");
 
   if (!document) {
     throw new Error("Unable to parse the HTML code");
   }
 
-  return document;
+  return document as unknown as Document;
+}
+
+export function stringToFragment(string: string): DocumentFragment {
+  const body = stringToDocument(string).body;
+  const fragmentDocument = document.createDocumentFragment();
+  while (body.firstChild) {
+    fragmentDocument.appendChild(body.firstChild);
+  }
+  return fragmentDocument;
 }
 
 export function yesterday(): Date {

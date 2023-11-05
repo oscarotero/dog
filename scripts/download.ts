@@ -1,5 +1,4 @@
 import { parseDate, stringToDocument, yesterday } from "./utils.ts";
-import { Element } from "dom";
 
 async function saveDay(date: Date) {
   const [year, month, day] = parseDate(date);
@@ -24,16 +23,17 @@ async function saveDay(date: Date) {
 
   // Check if exists (the response is always 200)
   const title = document.querySelector(".cabeceiraContido h1");
-  if (title?.innerText.trim() === "Páxina non atopada") {
+
+  if (title?.innerHTML.trim() === "Páxina non atopada") {
     console.log("No DOG for", date);
     return;
   }
 
   const firstLink = document.querySelector(
     ".corpoContido .dog-toc-sumario a",
-  ) as Element;
+  );
 
-  await saveAll(new URL(firstLink.getAttribute("href")!, url), path);
+  await saveAll(new URL(firstLink?.getAttribute("href")!, url), path);
 }
 
 async function saveAll(next: URL | undefined, path: string, page = 1) {
