@@ -9,7 +9,6 @@
     ]
   },
   "tasks": {
-    "download": "deno run --v8-flags=--max-old-space-size=8000 -A scripts/download.ts",
-    "clean": "deno run --v8-flags=--max-old-space-size=8000 -A scripts/clean.ts"
+    "run": "deno run --v8-flags=--max-old-space-size=8000 -A scripts/main.ts"
   }
 }

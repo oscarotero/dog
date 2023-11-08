@@ -1,6 +1,6 @@
-import { parseDate, stringToDocument, yesterday } from "./utils.ts";
+import { parseDate, stringToDocument } from "./utils.ts";
 
-async function saveDay(date: Date) {
+export async function saveDay(date: Date): Promise<boolean> {
   const [year, month, day] = parseDate(date);
 
   const url = new URL(
@@ -12,7 +12,7 @@ async function saveDay(date: Date) {
   try {
     if (Deno.statSync(path)) {
       console.log(`Skip ${path}`);
-      return;
+      return false;
     }
   } catch {
     // Nothing
@@ -26,7 +26,7 @@ async function saveDay(date: Date) {
 
   if (title?.innerHTML.trim() === "Páxina non atopada") {
     console.log("No DOG for", date);
-    return;
+    return false;
   }
 
   const firstLink = document.querySelector(
@@ -34,6 +34,7 @@ async function saveDay(date: Date) {
   );
 
   await saveAll(new URL(firstLink?.getAttribute("href")!, url), path);
+  return true;
 }
 
 async function saveAll(next: URL | undefined, path: string, page = 1) {
@@ -64,5 +65,3 @@ async function save(
     return new URL(href, url);
   }
 }
-
-await saveDay(yesterday());

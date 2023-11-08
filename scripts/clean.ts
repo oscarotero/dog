@@ -1,9 +1,14 @@
-import { parseDate, stringToDocument, stringToFragment, yesterday } from "./utils.ts";
+import { stringToDocument, stringToFragment, parseDate } from "./utils.ts";
 import { stringify } from "std/yaml/mod.ts";
 import { format } from "std/fmt/bytes.ts";
 import { extract, test } from "std/front_matter/yaml.ts";
 
-function process(path: string) {
+export function process(path: string | Date) {
+  if (path instanceof Date) {
+    const day = parseDate(path);
+    path = `files/${day[0]}/${day.join("-")}`;
+  }
+
   const files = Deno.readDirSync(path);
 
   for (const file of files) {
@@ -121,12 +126,17 @@ function cleanHTML(element: Element): string {
     em.innerHTML = span.innerHTML;
     span.replaceWith(em);
   });
-  element.querySelectorAll("span.dog-negrita").forEach((span) => {
+  element.querySelectorAll("span.dog-negrita-cursiva").forEach((span) => {
+    const em = document.createElement("em");
+    em.innerHTML = `<strong>${span.innerHTML}</strong>`;
+    span.replaceWith(em);
+  });
+  element.querySelectorAll("span.dog-negrita,span.texto-en-negrita").forEach((span) => {
     const strong = document.createElement("strong");
     strong.innerHTML = span.innerHTML;
     span.replaceWith(strong);
   });
-  element.querySelectorAll("span.dog-superindice").forEach((span) => {
+  element.querySelectorAll("span.dog-superindice,span.dog-cursiva-superindice").forEach((span) => {
     const sup = document.createElement("sup");
     sup.innerHTML = span.innerHTML;
     span.replaceWith(sup);
@@ -137,27 +147,52 @@ function cleanHTML(element: Element): string {
     span.replaceWith(sub);
   });
 
-  element.querySelectorAll("span.dog-normal, span.fuente-de-p-rrafo-predeter-, .span.dog-texto-sumario")
-    .forEach((span) => {
-      span.replaceWith(stringToFragment(span.innerHTML));
+  // Remove spans
+  element.querySelectorAll([
+    "span.dog-normal",
+    "span.dog-normal1",
+    "span.fuente-de-p-rrafo-predeter-",
+    "span.fuente-de-p-rrafo-predeter-1",
+    "span.fuente-de-p-rrafo-predeter-4",
+    "span.dog-texto-sumario",
+    "span.dog-texto-sumario-2",
+    "span.dog-subrayado",
+    "span.unknown",
+    "span.a2",
+    "span.x-none-",
+    "span.c-vermello",
+    "span.c-azul",
+    "span.c-riscado",
+    "span.ttp1-car-car",
+    "span.e-normal-texto",
+    "span.tipo-de-letra-predefinido-do-par-grafo",
+  ].join(",")).forEach((span) => {
+      span.replaceWith(stringToFragment(span.ownerDocument, span.innerHTML));
     });
 
   // Fix headers
-  element.querySelectorAll(
-    "p.dog-anexo-nome, p.dog-anexo-encabezado, p.dog-capitulo",
-  ).forEach(
+  element.querySelectorAll([
+    "p.dog-anexo-nome",
+    "p.dog-anexo-encabezado",
+    "p.dog-capitulo",
+    "p.dog-capitulo-nome",
+    "p.dog-centrado-negrita",
+    "p.dog-titulo",
+    "p.dog-titulo-nome",
+    "p.dog-artigo",
+    "p.dog-centrado-sin-cursiva-c-a",
+    "p.dog-centrado-sin-cursiva-c-b",
+    "p.dog-centrado-cursiva-c-a",
+    "p.dog-centrado-cursiva-c-b",
+    "p.dog-seccion",
+    "p.dog-subseccion",
+  ].join(",")).forEach(
     (p) => {
       const h2 = document.createElement("h2");
       h2.innerHTML = p.innerHTML;
       p.replaceWith(h2);
     },
   );
-  element.querySelectorAll("p.dog-capitulo-nome, p.dog-centrado-negrita")
-    .forEach((p) => {
-      const h3 = document.createElement("h3");
-      h3.innerHTML = p.innerHTML;
-      p.replaceWith(h3);
-    });
 
   // Fix footers
   element.querySelectorAll("p.dog-firma-centrada").forEach((p) => {
@@ -165,33 +200,71 @@ function cleanHTML(element: Element): string {
     footer.innerHTML = `<p>${p.innerHTML}</p>`;
     p.replaceWith(footer);
   });
+  element.querySelectorAll("footer + p.dog-firma-izq").forEach((p) => {
+    const footer = p.previousElementSibling;
+    if (footer?.matches("footer")) {
+      p.removeAttribute("class");
+      footer.appendChild(p);
+    }
+  });
+  element.querySelectorAll("p.dog-firma-izq").forEach((p) => {
+    const footer = document.createElement("footer");
+    footer.innerHTML = `<p>${p.innerHTML}</p>`;
+    p.replaceWith(footer);
+  });
 
   // Fix table cells
   element.querySelectorAll("td > p").forEach((p) => {
-    p.parentElement!.innerHTML = p.innerHTML;
+    const parent = p.parentElement;
+    if (parent) {
+      parent.innerHTML = p.innerHTML;
+    }
   });
   element.querySelectorAll("td,th").forEach((td) =>
     td.innerHTML = td.innerHTML?.trim()
   );
-  element.querySelectorAll("table[border]").forEach((table) => {
-    table.removeAttribute("border");
-  });
   element.querySelectorAll("td.dog-celda-encabezado").forEach((td) => {
     const th = document.createElement("th");
     th.innerHTML = td.innerHTML;
     td.replaceWith(th);
   });
 
-  // Remove tables ids
-  element.querySelectorAll("table[id]").forEach((table) => {
+  // Remove tables attributes
+  element.querySelectorAll("table").forEach((table) => {
     table.removeAttribute("id");
+    table.removeAttribute("border");
+    table.removeAttribute("class");
   });
 
   // Remove classes
-  element.querySelectorAll(
-    "p.dog-base-sangria, p.dog-base-sin-sangria-sin-espaciado, p.dog-base-sin-sangria-primera-linea-anexo, p.dog-base-sin-sangria, p.dog-parrafo-justificado",
-  ).forEach((p) => {
-    p.removeAttribute("class");
+  element.querySelectorAll([
+    "p.dog-base-sangria",
+    "p.dog-base-sin-sangria-sin-espaciado",
+    "p.dog-base-sin-sangria-primera-linea-anexo",
+    "p.dog-base-sin-sangria",
+    "p.dog-parrafo-justificado",
+    "p.dog-dispositiva-cuerpo",
+    "li.dog-vinheta-punto",
+    "li.dog-vinheta-asterisco",
+    "li.dog-vinheta-guion",
+    "li.normal",
+    "li.t-tulo-3",
+    "li.dog-enum-latina",
+    "li.dog-enum-arabe-1",
+    "li.x-ning-n-estilo-de-p-rrafo-",
+    "td.dog-celda-centrada",
+    "td.dog-celda",
+    "table.dog-tabla",
+    "ol.latina",
+    "ol.arabe",
+    "p.basic-paragraph",
+    "p.dog-normal1",
+    "p.normal",
+    "td.estilo-de-celda-1",
+    "p.x-ning-n-estilo-de-p-rrafo-",
+    "p.lista-con-vi-etas",
+  ].join(",")).forEach((el) => {
+    el.removeAttribute("class");
   });
 
   // Remove span elements
@@ -238,19 +311,4 @@ function cleanHTML(element: Element): string {
   code = code.replaceAll("\n</p>\n", "</p>\n");
 
   return code;
-}
-
-// const day = parseDate(yesterday());
-// process(`files/${day[0]}/${day.join("-")}`);
-
-// process("files/2017/2017-04-17");
-
-for (const year of Deno.readDirSync("files")) {
-  if (year.isDirectory) {
-    for (const day of Deno.readDirSync(`files/${year.name}`)) {
-      if (day.isDirectory) {
-        process(`files/${year.name}/${day.name}`);
-      }
-    }
-  }
 }

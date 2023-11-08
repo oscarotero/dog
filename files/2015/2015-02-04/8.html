@@ -17,7 +17,7 @@ url: >-
     <p>Esta última posibilidade, que actúa en paralelo co procedemento de recollida de sinaturas por pregos utilizado tradicionalmente, é coherente coa actual redacción do Estatuto de autonomía para Galicia, que prevé como un dos obxectivos básicos da Comunidade Autónoma a participación de todos os galegos e galegas na vida política, económica, cultural e social.</p>
     <p>Sendo competencia da Xunta Electoral de Galicia, segundo dispoñen o artigo 9 e a disposición transitoria da citada Lei 1/1988, garantir a regularidade do procedemento de recollida de sinaturas, faise necesario precisar os aspectos máis importantes do citado procedemento mediante ficheiros electrónicos, para efectos de facilitar o labor da comisión promotora, da Oficina do Censo Electoral e da Xunta Electoral de Galicia, en consonancia co xa acordado pola Xunta Electoral Central (Acordo do 10 de maio de 2012).</p>
     <p>Para precisar e aclarar estas cuestións, a Xunta Electoral de Galicia acorda, en uso das competencias atribuídas na Lei electoral de Galicia, así como na Lei de iniciativa lexislativa popular ante o Parlamento de Galicia, aprobar o seguinte</p>
-    <p class="dog-centrado-sin-cursiva-c-a">ACORDO:</p>
+    <h2>ACORDO:</h2>
     <p>Primeiro. <em>Datos das persoas asinantes</em></p>
     <p>Os datos obrigatorios para realizar a acreditación da condición de elector ou electora asinante son: primeiro apelido, segundo apelido, nome, número do documento nacional de identidade ou pasaporte, data de nacemento, concello galego en cuxas listas está inscrito/a e marca de tempo nas sinaturas electrónicas.</p>
     <p>Segundo. <em>Recollida de sinaturas electrónicas</em></p>
@@ -49,7 +49,7 @@ url: >-
     <h2>Anexo<br>Especificacións técnicas sobre a recollida de sinaturas para unha iniciativa lexislativa popular por vía electrónica e para a súa certificación</h2>
     <p>As sinaturas recollidas por vía electrónica deberán presentarse en formato XML e conter os datos que identifican as persoas asinantes, o código e título da iniciativa lexislativa popular e a sinatura de todas elas.</p>
     <p>As sinaturas entregaranse agrupadas nun ou varios ficheiros comprimidos, tipo ZIP.</p>
-    <h3>Formato XML dos datos da persoa asinante</h3>
+    <h2>Formato XML dos datos da persoa asinante</h2>
     <p>O formato do ficheiro antes de ser asinado é o seguinte:</p>
     <p>&lt;?xml version=”1.0” encoding=”UTF-8”?&gt;</p>
     <p>&lt;ilp&gt;</p>
@@ -148,14 +148,14 @@ url: >-
     <p>&lt;/xs:restriction&gt;</p>
     <p>&lt;/xs:simpleType&gt;</p>
     <p>&lt;/xs:schema&gt;</p>
-    <h3>Formato da sinatura e do ficheiro asinado</h3>
+    <h2>Formato da sinatura e do ficheiro asinado</h2>
     <p>O XML cos datos da persoa asinante segundo o esquema anterior deberá ser asinado seguindo a política de sinatura da Administración xeral do Estado definida en (OID: 2.16.724.1.3.1.1.2.1.8).</p>
     <p>Dentro desta política recoméndase a sinatura en formato XADES, clase básica, internally detached.</p>
-    <h3>Ficheiros XML</h3>
+    <h2>Ficheiros XML</h2>
     <p>O ficheiro anterior, cos datos asinados e a sinatura, deberá almacenarse co nome ILP12AANNN. DDDDDDDDD.XML, onde:</p>
     <p>Campo de descrición: ILP12AANNN é o valor de &lt;codigoilp&gt;.</p>
     <p>DDDDDDDDD é o número do documento nacional de identidade da persoa que asina a iniciativa lexislativa popular (o documento nacional de identidade do certificado usado para asinar e o documento nacional de identidade do campo &lt;ID&gt;).</p>
-    <h3>Ficheiros ZIP</h3>
+    <h2>Ficheiros ZIP</h2>
     <p>Para cada iniciativa lexislativa popular formarase, cos ficheiros anteriores, un ou varios ficheiros ZIP coas denominacións seguintes: ILP12AANNN.FFF.ZIP, onde:</p>
     <p> Campo de descrición: ILP12AANNN é o valor do &lt;codigoilp&gt;</p>
     <p>FFF Número do ficheiro de entrega. De 1 a 100.</p>
