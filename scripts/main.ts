@@ -2,7 +2,6 @@ import { updateDates } from "./utils.ts";
 import { saveDay } from "./download.ts";
 import { process } from "./clean.ts";
 
-
 // for (const date of updateDates()) {
 //   if (await saveDay(date)) {
 //     process(date);

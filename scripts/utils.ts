@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
 import { DOMParser } from "dom";
 
-
 const parser = new DOMParser();
 
 export function stringToDocument(string: string): Document {
@@ -14,7 +13,10 @@ export function stringToDocument(string: string): Document {
   return document as unknown as Document;
 }
 
-export function stringToFragment(document: Document, string: string): DocumentFragment {
+export function stringToFragment(
+  document: Document,
+  string: string,
+): DocumentFragment {
   const body = stringToDocument(string).body;
   const fragmentDocument = document.createDocumentFragment();
   while (body.firstChild) {
@@ -36,7 +38,7 @@ export function* updateDates(): Generator<Date> {
     date.setDate(date.getDate() - 1);
     const [year, month, day] = parseDate(date);
     const path = `files/${year}/${year}-${month}-${day}`;
-    
+
     // Check if the path exists
     try {
       if (Deno.statSync(path).isDirectory) {

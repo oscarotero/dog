@@ -1,4 +1,4 @@
-import { stringToDocument, stringToFragment, parseDate } from "./utils.ts";
+import { parseDate, stringToDocument, stringToFragment } from "./utils.ts";
 import { stringify } from "std/yaml/mod.ts";
 import { format } from "std/fmt/bytes.ts";
 import { extract, test } from "std/front_matter/yaml.ts";
@@ -131,16 +131,19 @@ function cleanHTML(element: Element): string {
     em.innerHTML = `<strong>${span.innerHTML}</strong>`;
     span.replaceWith(em);
   });
-  element.querySelectorAll("span.dog-negrita,span.texto-en-negrita").forEach((span) => {
-    const strong = document.createElement("strong");
-    strong.innerHTML = span.innerHTML;
-    span.replaceWith(strong);
-  });
-  element.querySelectorAll("span.dog-superindice,span.dog-cursiva-superindice").forEach((span) => {
-    const sup = document.createElement("sup");
-    sup.innerHTML = span.innerHTML;
-    span.replaceWith(sup);
-  });
+  element.querySelectorAll("span.dog-negrita,span.texto-en-negrita").forEach(
+    (span) => {
+      const strong = document.createElement("strong");
+      strong.innerHTML = span.innerHTML;
+      span.replaceWith(strong);
+    },
+  );
+  element.querySelectorAll("span.dog-superindice,span.dog-cursiva-superindice")
+    .forEach((span) => {
+      const sup = document.createElement("sup");
+      sup.innerHTML = span.innerHTML;
+      span.replaceWith(sup);
+    });
   element.querySelectorAll("span.dog-subindice").forEach((span) => {
     const sub = document.createElement("sub");
     sub.innerHTML = span.innerHTML;
@@ -167,8 +170,8 @@ function cleanHTML(element: Element): string {
     "span.e-normal-texto",
     "span.tipo-de-letra-predefinido-do-par-grafo",
   ].join(",")).forEach((span) => {
-      span.replaceWith(stringToFragment(span.ownerDocument, span.innerHTML));
-    });
+    span.replaceWith(stringToFragment(span.ownerDocument, span.innerHTML));
+  });
 
   // Fix headers
   element.querySelectorAll([
@@ -291,14 +294,14 @@ function cleanHTML(element: Element): string {
     /&lt;(https?:\/\/[^\s]+)&gt;/g,
     (_, url) => {
       return `<a href="${url}">${url}</a>`;
-    }
+    },
   );
   // Fix email address
   code = code.replace(
     /&lt;([^\s]+)@([^\s]+)&gt;/g,
     (_, name, domain) => {
       return `<a href="mailto:${name}@${domain}">${name}@${domain}</a>`;
-    }
+    },
   );
 
   // Remove empty lines
