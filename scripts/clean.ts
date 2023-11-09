@@ -3,7 +3,7 @@ import { stringify } from "std/yaml/mod.ts";
 import { format } from "std/fmt/bytes.ts";
 import { extract, test } from "std/front_matter/yaml.ts";
 
-export function process(path: string | Date) {
+export function processDay(path: string | Date) {
   if (path instanceof Date) {
     const day = parseDate(path);
     path = `files/${day[0]}/${day.join("-")}`;
@@ -161,14 +161,37 @@ function cleanHTML(element: Element): string {
     "span.dog-texto-sumario-2",
     "span.dog-subrayado",
     "span.unknown",
+    "span.ninguno",
+    "span.enlace-de-internet",
+    "span.hyperlink",
+    "span.hyperlink-1",
+    "span.hiperv-nculo",
+    "span.hiperligaz-on",
     "span.a2",
+    "span.a3",
+    "span.a4",
+    "span.a5",
+    "span.texte1",
+    "span.texte",
+    "span.feder",
+    "span.dog-titulo-publicacion-teu",
+    "span.dog-base-sangria-car",
     "span.x-none-",
     "span.c-vermello",
     "span.c-azul",
     "span.c-riscado",
+    "span.p1-car",
+    "span.ttp1-car",
+    "span.ttp1-car-c",
     "span.ttp1-car-car",
+    "span.ttp2-car-car",
+    "span.listlabel-5",
+    "span.listlabel-24",
+    "span.listlabel-67",
     "span.e-normal-texto",
+    "span.markedcontent",
     "span.tipo-de-letra-predefinido-do-par-grafo",
+    "span.tipo-de-letra-predefinido-do-par-grafo1",
   ].join(",")).forEach((span) => {
     span.replaceWith(stringToFragment(span.ownerDocument, span.innerHTML));
   });
@@ -177,6 +200,7 @@ function cleanHTML(element: Element): string {
   element.querySelectorAll([
     "p.dog-anexo-nome",
     "p.dog-anexo-encabezado",
+    "p.dog-celda-encabezado",
     "p.dog-capitulo",
     "p.dog-capitulo-nome",
     "p.dog-centrado-negrita",
@@ -247,6 +271,7 @@ function cleanHTML(element: Element): string {
     "p.dog-base-sin-sangria",
     "p.dog-parrafo-justificado",
     "p.dog-dispositiva-cuerpo",
+    "p.dog-data",
     "li.dog-vinheta-punto",
     "li.dog-vinheta-asterisco",
     "li.dog-vinheta-guion",
@@ -256,6 +281,9 @@ function cleanHTML(element: Element): string {
     "li.dog-enum-arabe-1",
     "li.x-ning-n-estilo-de-p-rrafo-",
     "td.dog-celda-centrada",
+    "td.dog-celda-dcha",
+    "td.dog-celda-izq",
+    "td.dog-celda-pie",
     "td.dog-celda",
     "table.dog-tabla",
     "ol.latina",
@@ -263,6 +291,7 @@ function cleanHTML(element: Element): string {
     "p.basic-paragraph",
     "p.dog-normal1",
     "p.normal",
+    "p.e-normal-texto",
     "td.estilo-de-celda-1",
     "p.x-ning-n-estilo-de-p-rrafo-",
     "p.lista-con-vi-etas",
@@ -270,7 +299,7 @@ function cleanHTML(element: Element): string {
     el.removeAttribute("class");
   });
 
-  // Remove span elements
+  // Fix links elements
   element.querySelectorAll("span.dog-hyperlink").forEach((span) => {
     span.replaceWith(span.querySelector("a")!);
   });
